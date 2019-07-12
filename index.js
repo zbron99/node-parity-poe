@@ -33,6 +33,7 @@ exports.Side = {
 
 exports.OrderRejectReason = {
   UNKNOWN_INSTRUMENT: 'I',
+  INVALID_TYPE: 'T',
   INVALID_PRICE: 'P',
   INVALID_QUANTITY: 'Q',
 };
@@ -72,14 +73,16 @@ exports.parseInbound = (buffer) => {
 };
 
 function formatEnterOrder(message) {
-  const buffer = Buffer.allocUnsafe(42);
+  const buffer = Buffer.allocUnsafe(63);
 
+  // messageType 'E' - Enter Order
   buffer.writeUInt8(0x45, 0);
-  writeString(buffer, message.orderId, 1, 16);
-  writeString(buffer, message.side, 17, 1);
-  writeString(buffer, message.instrument, 18, 8);
-  writeUInt64BE(buffer, message.quantity, 26);
-  writeUInt64BE(buffer, message.price, 34);
+  writeString(buffer, message.orderId, 1, 36);
+  writeString(buffer, message.type, 37, 1);
+  writeString(buffer, message.side, 38, 1);
+  writeString(buffer, message.instrument, 39, 8);
+  writeUInt64BE(buffer, message.quantity, 47);
+  writeUInt64BE(buffer, message.price, 55);
 
   return buffer;
 }
@@ -96,11 +99,11 @@ function parseEnterOrder(buffer) {
 }
 
 function formatCancelOrder(message) {
-  const buffer = Buffer.allocUnsafe(25);
+  const buffer = Buffer.allocUnsafe(45);
 
   buffer.writeUInt8(0x58, 0);
-  writeString(buffer, message.orderId, 1, 16);
-  writeUInt64BE(buffer, message.quantity, 17);
+  writeString(buffer, message.orderId, 1, 36);
+  writeUInt64BE(buffer, message.quantity, 37);
 
   return buffer;
 }
@@ -164,12 +167,13 @@ function parseOrderAccepted(buffer) {
   return {
     messageType: MessageType.ORDER_ACCEPTED,
     timestamp: readUInt64BE(buffer, 1),
-    orderId: readString(buffer, 9, 16),
-    side: readString(buffer, 25, 1),
-    instrument: readString(buffer, 26, 8),
-    quantity: readUInt64BE(buffer, 34),
-    price: readUInt64BE(buffer, 42),
-    orderNumber: readUInt64BE(buffer, 50),
+    orderId: readString(buffer, 9, 36),
+    type: readString(buffer, 45, 1),
+    side: readString(buffer, 46, 1),
+    instrument: readString(buffer, 47, 8),
+    quantity: readUInt64BE(buffer, 55),
+    price: readUInt64BE(buffer, 63),
+    orderNumber: readUInt64BE(buffer, 71),
   };
 }
 
@@ -211,22 +215,22 @@ function parseOrderExecuted(buffer) {
   return {
     messageType: MessageType.ORDER_EXECUTED,
     timestamp: readUInt64BE(buffer, 1),
-    orderId: readString(buffer, 9, 16),
-    quantity: readUInt64BE(buffer, 25),
-    price: readUInt64BE(buffer, 33),
-    liquidityFlag: readString(buffer, 41, 1),
-    matchNumber: buffer.readUInt32BE(42),
+    orderId: readString(buffer, 9, 36),
+    quantity: readUInt64BE(buffer, 45),
+    price: readUInt64BE(buffer, 53),
+    liquidityFlag: readString(buffer, 61, 1),
+    matchNumber: buffer.readUInt32BE(62),
   };
 }
 
 function formatOrderCanceled(message) {
-  const buffer = Buffer.allocUnsafe(34);
+  const buffer = Buffer.allocUnsafe(54);
 
   buffer.writeUInt8(0x58, 0);
   writeUInt64BE(buffer, message.timestamp, 1);
-  writeString(buffer, message.orderId, 9, 16);
-  writeUInt64BE(buffer, message.canceledQuantity, 25);
-  writeString(buffer, message.reason, 33, 1);
+  writeString(buffer, message.orderId, 9, 36);
+  writeUInt64BE(buffer, message.canceledQuantity, 45);
+  writeString(buffer, message.reason, 53, 1);
 
   return buffer;
 }
