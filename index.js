@@ -134,6 +134,17 @@ function parseOrderPrice(price) {
 }
 
 function formatEnterOrder(message) {
+  switch (message.type) {
+    case 'Limit':
+      return formatEnterLimitOrder(message);
+    case 'Market': 
+      return formatEnterMarketOrder(message);
+    case 'Stop':
+      return formatEnterStopOrder(message);
+  }
+}
+
+function formatEnterLimitOrder(message) {
   const buffer = Buffer.allocUnsafe(63);
 
   // messageType 'E' - Enter Order
@@ -144,6 +155,37 @@ function formatEnterOrder(message) {
   writeString(buffer, message.instrument, 39, 8);
   writeUInt64BE(buffer, formatOrderQuantity(message.quantity), 47);
   writeUInt64BE(buffer, formatOrderPrice(message.price), 55);
+
+  return buffer;
+}
+
+function formatEnterMarketOrder(message) {
+  const buffer = Buffer.allocUnsafe(63);
+
+  // messageType 'E' - Enter Order
+  buffer.writeUInt8(0x45, 0);
+  writeString(buffer, message.orderId, 1, 36);
+  writeString(buffer, formatOrderType(message.type), 37, 1);
+  writeString(buffer, formatOrderSide(message.side), 38, 1);
+  writeString(buffer, message.instrument, 39, 8);
+  writeUInt64BE(buffer, formatOrderQuantity(message.quantity), 47);
+  writeUInt64BE(buffer, formatOrderPrice(message.limit), 55);
+
+  return buffer;
+}
+
+function formatEnterStopOrder(buffer, message) {
+  const buffer = Buffer.allocUnsafe(71);
+
+  // messageType 'E' - Enter Order
+  buffer.writeUInt8(0x45, 0);
+  writeString(buffer, message.orderId, 1, 36);
+  writeString(buffer, formatOrderType(message.type), 37, 1);
+  writeString(buffer, formatOrderSide(message.side), 38, 1);
+  writeString(buffer, message.instrument, 39, 8);
+  writeUInt64BE(buffer, formatOrderQuantity(message.quantity), 47);
+  writeUInt64BE(buffer, formatOrderPrice(message.price), 63);
+  writeUInt64BE(buffer, formatOrderPrice(message.limit), 55);
 
   return buffer;
 }
