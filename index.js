@@ -207,7 +207,7 @@ function parseOrderAccepted(buffer) {
     orderId: readString(buffer, 9, 36),
     type: parseOrderType(readString(buffer, 45, 1)),
     side: parseOrderSide(readString(buffer, 46, 1)),
-    instrument: trim(readString(buffer, 47, 8)),
+    instrument: readString(buffer, 47, 8).trim(),
     quantity: parseOrderQuantity(readUInt64BE(buffer, 55)),
     price: parseOrderPrice(readUInt64BE(buffer, 63)),
     orderNumber: readUInt64BE(buffer, 71),
