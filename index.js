@@ -15,7 +15,10 @@
  */
 'use strict';
 
-const BN = require('bignumber.js');
+const BigNumber = require('bignumber.js');
+BigNumber.config({
+  EXPONENTIAL_AT: 9
+});
 
 const MessageType = {
   ENTER_ORDER: 'E',
@@ -118,19 +121,19 @@ function parseOrderSide(side) {
 }
 
 function formatOrderQuantity(quantity) {
-  return new BN(quantity).times(Factor.SIZE).toNumber();
+  return new BigNumber(quantity).times(Factor.SIZE).toNumber();
 }
 
 function parseOrderQuantity(quantity) {
-  return new BN(quantity).dividedBy(Factor.SIZE).toString();
+  return new BigNumber(quantity).dividedBy(Factor.SIZE).toString();
 }
 
 function formatOrderPrice(price) {
-  return new BN(price).times(Factor.PRICE).toNumber();
+  return new BigNumber(price).times(Factor.PRICE).toNumber();
 }
 
 function parseOrderPrice(price) {
-  return new BN(price).dividedBy(Factor.PRICE).toString();
+  return new BigNumber(price).dividedBy(Factor.PRICE).toString();
 }
 
 function formatEnterOrder(message) {
